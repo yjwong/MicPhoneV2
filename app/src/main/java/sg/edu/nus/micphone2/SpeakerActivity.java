@@ -2,6 +2,10 @@ package sg.edu.nus.micphone2;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -9,20 +13,23 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.net.InetAddress;
 
 
-public class SpeakerActivity extends ActionBarActivity {
+public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.CreateNdefMessageCallback {
     private final static String TAG = "SpeakerActivity";
     private final static String STATE_KEY_LOADING = "loading";
     private final static String STATE_KEY_LOADED = "loaded";
     private final static String STATE_KEY_LOCAL_ADDRESS = "localAddress";
+    private final static String NFC_TYPE_IP_ADDRESS = "nfcTypeIpAddress";
 
     private ProgressDialog mLoadingDialog;
     private boolean mLoading;
     private boolean mLoaded;
     private InetAddress mLocalAddress;
+    private NfcAdapter mNfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +109,25 @@ public class SpeakerActivity extends ActionBarActivity {
         // Display speaker IP address.
         TextView ipAddressView = (TextView) findViewById(R.id.speaker_ip_address);
         ipAddressView.setText(mLocalAddress.toString());
+
+        // Advertise ourselves via NFC.
+        Log.d(TAG, "Advertising via NFC");
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        if (mNfcAdapter == null) {
+            Toast.makeText(this, getString(R.string.speaker_nfc_not_available), Toast.LENGTH_SHORT).show();
+        } else {
+            mNfcAdapter.setNdefPushMessageCallback(this, this);
+        }
+    }
+
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+        Log.d(TAG, "createNdefMessage: " + event);
+        return new NdefMessage(
+                new NdefRecord[]{
+                        NdefRecord.createMime("application/vnd.sg.edu.nus.micphone2", mLocalAddress.getAddress())
+                }
+        );
     }
 
     private class GetLocalAddressTask extends AsyncTask<Void, Void, InetAddress> {

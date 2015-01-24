@@ -44,6 +44,7 @@
     <string name="title_activity_speaker">Speaker Running</string>
     <string name="start_speaker">Start Speaker</string>
     <string name="speaker_ip_address">Speaker IP address:</string>
+    <string name="speaker_nfc_not_available">NFC is not available. To pair using NFC, first enable NFC.</string>
 
 
 </resources>

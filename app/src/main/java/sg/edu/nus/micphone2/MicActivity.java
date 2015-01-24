@@ -8,8 +8,11 @@ import android.media.MediaRecorder;
 import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
+import android.nfc.NdefMessage;
+import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -53,14 +56,25 @@ public class MicActivity extends ActionBarActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Intent intent = getIntent();
-        String InetIP = intent.getStringExtra(I_NEED_IP);
-        //InetIP = "127.0.0.1";
-
         try {
-            InetAddress speakerAddress = InetAddress.getByName(InetIP);
-            MicrophoneTask microphoneTask = new MicrophoneTask();
-            microphoneTask.execute(speakerAddress);
+            // Check if the IP is available via NFC.
+            Intent intent = getIntent();
+            InetAddress speakerAddress = null;
+            if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+                Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+                NdefMessage message = (NdefMessage) rawMessages[0];
+                speakerAddress = InetAddress.getByAddress(message.getRecords()[0].getPayload());
+            } else {
+                String inetIP = intent.getStringExtra(I_NEED_IP);
+                speakerAddress = InetAddress.getByName(inetIP);
+            }
+
+            if (speakerAddress == null) {
+                Log.e(TAG, "speakerAddress is null");
+            } else {
+                MicrophoneTask microphoneTask = new MicrophoneTask();
+                microphoneTask.execute(speakerAddress);
+            }
 
         } catch (IOException ioe) {
             Log.e(TAG, "Error in creating speakerAddress : " + ioe.getMessage());
