@@ -1,9 +1,12 @@
 package sg.edu.nus.micphone2;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class PairingActivity extends ActionBarActivity {
@@ -12,6 +15,35 @@ public class PairingActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pairing);
+
+        // Link the buttons to their respective activities.
+        Button btnNfcChoice = (Button) findViewById(R.id.pairing_choice_nfc);
+        Button btnQrCodeChoice = (Button) findViewById(R.id.pairing_choice_qr_code);
+        Button btnManualChoice = (Button) findViewById(R.id.pairing_choice_manual);
+
+        btnNfcChoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PairingActivity.this, NfcPairingActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnQrCodeChoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PairingActivity.this, QrCodePairingActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        btnManualChoice.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PairingActivity.this, ManualPairingActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
 

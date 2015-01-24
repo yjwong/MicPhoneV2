@@ -49,6 +49,11 @@ public class MainActivity extends ActionBarActivity {
                 OpenMic();
                 return true;
 
+            case R.id.action_pairing:
+                Intent intent = new Intent(this, PairingActivity.class);
+                startActivity(intent);
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
