@@ -29,6 +29,7 @@ public class MicActivity extends ActionBarActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
+        // Magic, Do not touch
         switch(item.getItemId())
         {
 
