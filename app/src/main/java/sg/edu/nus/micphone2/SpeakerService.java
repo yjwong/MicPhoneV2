@@ -1,14 +1,12 @@
 package sg.edu.nus.micphone2;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,15 +17,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 public class SpeakerService extends IntentService {
@@ -74,8 +68,8 @@ public class SpeakerService extends IntentService {
                 NetworkTask netTask = new NetworkTask(ss.getInetAddress());
                 netTask.doInBackground(incoming);
             }
-        }catch(Exception e){
-            e.printStackTrace();
+        }catch(IOException ioe){
+            Log.e(TAG, "IOException " + ioe.getMessage());
         }
     }
 
@@ -150,9 +144,12 @@ public class SpeakerService extends IntentService {
 
         MicStream(InetAddress speakerAddress, Socket clientSoc){
             this.mSpeakerAddress = speakerAddress;
+            Log.v(TAG, "Constructing and Connecting MicStream");
             establishConnection(clientSoc);
+            Log.d(TAG, "Established Connection");
             mBufferSize = AudioTrack.getMinBufferSize
                     (SAMPLING_RATE,CHANNEL_CONFIG,AUDIO_FORMAT)*2;
+            Log.v(TAG, "BufferSize = " + mBufferSize);
         }
 
         @Override
@@ -170,8 +167,9 @@ public class SpeakerService extends IntentService {
                     Log.d(TAG, "Wrote " +numByteWrote +" to Track");
                     speakerTrack.play();
 
-                }catch(Exception e){
-                    e.printStackTrace();
+                }catch(IOException ioe){
+                    Log.e(TAG, "IOException at main Thread for " + mAudioStream.getInetAddress());
+                    break;
                 }
             }
         }
@@ -191,10 +189,9 @@ public class SpeakerService extends IntentService {
                 Log.v(TAG, "Wrote to client :" + speakerPort);
 
                 clientSoc.close();
-            }catch(Exception e){
-                e.printStackTrace();
+            }catch(IOException ioe){
+                Log.e(TAG, "Socket Exception in establishConnection :" + ioe.getMessage());
             }
-
         }
     }
 }
