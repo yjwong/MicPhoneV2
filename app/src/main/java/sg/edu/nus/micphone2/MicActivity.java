@@ -30,15 +30,9 @@ public class MicActivity extends ActionBarActivity {
 
     }
 
-    public void test(View view)
-    {
-        Intent intent = new Intent(this,AboutActivity.class);
-        startActivity(intent);
-    }
-
+    // Magic!!!!! DO NOT TOUCH!!!!!!
     public void verifyDisconnect(View view)
     {
-        Log.d(TAG, "UNTIL HERE");
         Button confirmDisconnect = (Button) findViewById(R.id.verifyDisconnect);
         confirmDisconnect.setOnClickListener(new View.OnClickListener()
         {

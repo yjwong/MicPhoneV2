@@ -29,6 +29,30 @@
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+
+        <service
+            android:name=".SpeakerService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
+
+        <activity
+            android:name=".PairingActivity"
+            android:label="@string/title_activity_pairing"
+            android:parentActivityName=".MainActivity" >
+        </activity>
+        <activity
+            android:name=".NfcPairingActivity"
+            android:label="@string/title_activity_nfc_pairing" >
+        </activity>
+        <activity
+            android:name=".QrCodePairingActivity"
+            android:label="@string/title_activity_qr_code_pairing" >
+        </activity>
+        <activity
+            android:name=".ManualPairingActivity"
+            android:label="@string/title_activity_manual_pairing" >
+        </activity>
     </application>
 
 </manifest>
