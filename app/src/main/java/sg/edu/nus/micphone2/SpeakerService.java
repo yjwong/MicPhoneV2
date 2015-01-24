@@ -1,11 +1,12 @@
 package sg.edu.nus.micphone2;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.os.IBinder;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -15,9 +16,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.nio.ByteOrder;
 
 public class SpeakerService extends IntentService {
 
@@ -25,11 +30,13 @@ public class SpeakerService extends IntentService {
     private final static String TAG = "SpeakerService";
     private boolean mRunning = true;
     private AudioGroup mSpeaker;
+    private Context mContext;
 
-    public SpeakerService() {
+    public SpeakerService(Context context) {
         super(TAG);
         mSpeaker = new AudioGroup();
         mSpeaker.setMode(AudioGroup.MODE_MUTED);
+        mContext = context;
     }
 
     @Override
@@ -39,7 +46,7 @@ public class SpeakerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent){
-        try(ServerSocket ss = new ServerSocket(PORT)){
+        try(ServerSocket ss = new ServerSocket(PORT, 50, this.getLocalAddress(mContext))){
 
             Log.d(TAG, "Listening for Server on \n IP: " +
                     ss.getInetAddress().getHostAddress() +
@@ -59,6 +66,45 @@ public class SpeakerService extends IntentService {
     public void onDestroy() {
         mRunning = false;
         super.onDestroy();
+    }
+
+    private InetAddress getLocalAddress(Context context)  {
+        Log.d(TAG, "Getting Local Address");
+        WifiManager wifiManager = (WifiManager) context
+                .getSystemService(Context.WIFI_SERVICE);
+        for(Method method : wifiManager.getClass().getMethods()){
+            if(method.getName().equalsIgnoreCase("IsWifiAPEnabled")){
+                try {
+                    InetAddress ipAddress = null;
+                    if ((boolean) method.invoke(wifiManager)) {
+                        // Hardcoded Value in Android "192.168.43.1."
+                        try {
+                            ipAddress = InetAddress.getByName("192.168.43.1");
+                        } catch (UnknownHostException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        // We need to obtain the address to broadcast on this interface.
+                        int ipAddressInt = wifiManager.getConnectionInfo().getIpAddress();
+                        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
+                            ipAddressInt = Integer.reverseBytes(ipAddressInt);
+                        }
+
+                        byte[] ipByteArray = BigInteger.valueOf(ipAddressInt).toByteArray();
+                        try {
+                            ipAddress = InetAddress.getByAddress(ipByteArray);
+                        } catch (UnknownHostException e) {
+                            Log.e(TAG, "Unable to get host address");
+                            ipAddress = null;
+                        }
+                    }
+                    return ipAddress;
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 
     private class NetworkTask extends AsyncTask<Socket,Void,Void>{
