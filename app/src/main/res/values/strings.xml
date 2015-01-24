@@ -15,8 +15,6 @@
     <string name="mic_verify_disconnect">Are you 100% sure you want to disconnect?</string>
     <string name="mic_verify_yes">Yes</string>
     <string name="mic_verify_no">No</string>
-
-
     <string name="title_activity_pairing">Pair with a Speaker</string>
 
     <!-- Strings for Pairing Activity -->
@@ -27,5 +25,8 @@
     <string name="title_activity_qr_code_pairing">Pair using QR Code</string>
     <string name="title_activity_manual_pairing">Pair Manually</string>
 
+    <!-- Strings for QR code pairing activity -->
+    <string name="qr_code_not_an_ip_address">A QR code was detected, but is not a MicPhone QR code.</string>
+    <string name="title_activity_speaker">SpeakerActivity</string>
 
 </resources>
