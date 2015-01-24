@@ -55,22 +55,6 @@ public class MainActivity extends ActionBarActivity {
                 openAbout();
                 return true;
 
-            // STUB
-            // TO BE REMOVE BEFORE RELEASE
-            case R.id.action_mic:
-                openMic();
-                return true;
-
-            case R.id.action_pairing:
-                intent = new Intent(this, PairingActivity.class);
-                startActivity(intent);
-                return true;
-
-            case R.id.action_start_speaker:
-                intent = new Intent(this, SpeakerActivity.class);
-                startActivity(intent);
-                return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -85,14 +69,6 @@ public class MainActivity extends ActionBarActivity {
     public void openAbout()
     {
         Intent intent = new Intent(this, AboutActivity.class);
-        startActivity(intent);
-    }
-
-    // STUB
-    // TO BE REMOVE BEFORE RELEASE
-    public void openMic()
-    {
-        Intent intent = new Intent(this, MicActivity.class);
         startActivity(intent);
     }
 }

@@ -10,20 +10,4 @@
         app:showAsAction="never"
         />
 
-    // STUB
-    // TO REMOVE BEFORE FINAL RELEASE
-    <item
-        android:id="@+id/action_mic"
-        android:title="Mic"
-        app:showAsAction="never"
-        />
-    <item
-        android:id="@+id/action_pairing"
-        android:title="@string/title_activity_pairing"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/action_start_speaker"
-        android:title="@string/start_speaker"
-        app:showAsAction="never" />
-
 </menu>
