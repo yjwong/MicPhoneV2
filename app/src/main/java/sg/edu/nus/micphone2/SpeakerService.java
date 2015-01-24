@@ -30,13 +30,11 @@ public class SpeakerService extends IntentService {
     private final static String TAG = "SpeakerService";
     private boolean mRunning = true;
     private AudioGroup mSpeaker;
-    private Context mContext;
 
-    public SpeakerService(Context context) {
+    public SpeakerService() {
         super(TAG);
         mSpeaker = new AudioGroup();
         mSpeaker.setMode(AudioGroup.MODE_MUTED);
-        mContext = context;
     }
 
     @Override
@@ -46,7 +44,7 @@ public class SpeakerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent){
-        try(ServerSocket ss = new ServerSocket(PORT, 50, this.getLocalAddress(mContext))){
+        try(ServerSocket ss = new ServerSocket(PORT, 50, this.getLocalAddress())){
 
             Log.d(TAG, "Listening for Server on \n IP: " +
                     ss.getInetAddress().getHostAddress() +
@@ -68,9 +66,9 @@ public class SpeakerService extends IntentService {
         super.onDestroy();
     }
 
-    private InetAddress getLocalAddress(Context context)  {
+    private InetAddress getLocalAddress()  {
         Log.d(TAG, "Getting Local Address");
-        WifiManager wifiManager = (WifiManager) context
+        WifiManager wifiManager = (WifiManager) this
                 .getSystemService(Context.WIFI_SERVICE);
         for(Method method : wifiManager.getClass().getMethods()){
             if(method.getName().equalsIgnoreCase("IsWifiAPEnabled")){
