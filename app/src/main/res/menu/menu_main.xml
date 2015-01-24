@@ -17,4 +17,9 @@
         android:title="Mic"
         app:showAsAction="never"
         />
+    <item
+        android:id="@+id/action_pairing"
+        android:title="@string/title_activity_pairing"
+        app:showAsAction="never" />
+
 </menu>
