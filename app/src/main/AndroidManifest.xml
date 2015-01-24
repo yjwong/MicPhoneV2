@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="sg.edu.nus.micphone2" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:hardwareAccelerated="false"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        tools:replace="android:label" >
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name" >
@@ -20,6 +26,7 @@
         <activity
             android:name=".MicActivity"
             android:label="@string/title_activity_mic"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" >
         </activity>
         <activity
@@ -44,15 +51,27 @@
         </activity>
         <activity
             android:name=".NfcPairingActivity"
-            android:label="@string/title_activity_nfc_pairing" >
+            android:label="@string/title_activity_nfc_pairing"
+            android:parentActivityName=".PairingActivity" >
         </activity>
         <activity
             android:name=".QrCodePairingActivity"
-            android:label="@string/title_activity_qr_code_pairing" >
+            android:label="@string/title_activity_qr_code_pairing"
+            android:parentActivityName=".PairingActivity"
+            android:theme="@style/AppQrPairingActivityTheme" >
         </activity>
         <activity
             android:name=".ManualPairingActivity"
-            android:label="@string/title_activity_manual_pairing" >
+            android:label="@string/title_activity_manual_pairing"
+            android:parentActivityName=".PairingActivity" >
+        </activity>
+        <activity
+            android:name=".SpeakerActivity"
+            android:label="@string/title_activity_speaker"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="sg.edu.nus.micphone2.MainActivity" />
         </activity>
     </application>
 
