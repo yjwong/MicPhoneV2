@@ -16,6 +16,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MicActivity"
+            android:label="@string/title_activity_mic"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>
