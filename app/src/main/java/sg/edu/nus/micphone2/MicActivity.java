@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.os.AsyncTask;
@@ -40,6 +41,7 @@ public class MicActivity extends ActionBarActivity {
     public static final int SAMPLING_RATE = 44100;
     public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
+    private static final AudioCodec CODEC = AudioCodec.GSM_EFR;
 
     FragmentManager fragmentManager = getFragmentManager();
 
@@ -101,6 +103,7 @@ public class MicActivity extends ActionBarActivity {
                 // streamGroup.setMode(AudioGroup.MODE_ECHO_SUPPRESSION);
                 streamGroup.setMode(AudioGroup.MODE_NORMAL);
 
+                micStream.setCodec(CODEC);
                 micStream.setMode(AudioStream.MODE_SEND_ONLY);
                 micStream.associate(speakerAddress, speakerPort);
                 micStream.join(streamGroup);

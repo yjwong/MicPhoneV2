@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.net.rtp.AudioCodec;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.os.AsyncTask;
@@ -29,6 +30,7 @@ public class SpeakerService extends IntentService {
     public final static String LOCAL_IP_ADDRESS = "LOCAL_IP_ADDRESS";
     private final static int PORT = 65530;
     private final static String TAG = "SpeakerService";
+    private static final AudioCodec CODEC = AudioCodec.GSM_EFR;
     private boolean mRunning = true;
     private AudioGroup mSpeaker;
     private ArrayList<Thread> mStreams;
@@ -116,6 +118,7 @@ public class SpeakerService extends IntentService {
 
                 // Associate with client RTP endpoint.
                 audioStream.setMode(AudioStream.MODE_RECEIVE_ONLY);
+                audioStream.setCodec(CODEC);
                 audioStream.associate(micAddress, micPort);
                 audioStream.join(mSpeaker);
 
