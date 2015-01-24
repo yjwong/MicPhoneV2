@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Set;
-
 
 public class MainActivity extends ActionBarActivity {
 
@@ -32,25 +30,31 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
 
         // Magic, Do not touch
+        Intent intent;
         switch(item.getItemId())
         {
 
             case R.id.action_settings:
-                OpenSetting();
+                openSettings();
                 return true;
 
             case R.id.action_about:
-                OpenAbout();
+                openAbout();
                 return true;
 
             // STUB
             // TO BE REMOVE BEFORE RELEASE
-            case R.id.action_Mic:
-                OpenMic();
+            case R.id.action_mic:
+                openMic();
                 return true;
 
             case R.id.action_pairing:
-                Intent intent = new Intent(this, PairingActivity.class);
+                intent = new Intent(this, PairingActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.action_start_speaker:
+                intent = new Intent(this, SpeakerActivity.class);
                 startActivity(intent);
                 return true;
 
@@ -59,13 +63,13 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public void OpenSetting()
+    public void openSettings()
     {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
     }
 
-    public void OpenAbout()
+    public void openAbout()
     {
         Intent intent = new Intent(this, AboutActivity.class);
         startActivity(intent);
@@ -73,7 +77,7 @@ public class MainActivity extends ActionBarActivity {
 
     // STUB
     // TO BE REMOVE BEFORE RELEASE
-    public void OpenMic()
+    public void openMic()
     {
         Intent intent = new Intent(this, MicActivity.class);
         startActivity(intent);

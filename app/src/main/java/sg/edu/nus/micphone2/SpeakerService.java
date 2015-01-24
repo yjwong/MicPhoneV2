@@ -1,14 +1,12 @@
 package sg.edu.nus.micphone2;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -19,41 +17,44 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 
 public class SpeakerService extends IntentService {
 
+    public final static String LOCAL_IP_ADDRESS = "LOCAL_IP_ADDRESS";
     private final static int PORT = 65530;
     private final static String TAG = "SpeakerService";
     private boolean mRunning = true;
     private AudioGroup mSpeaker;
     private ArrayList<Thread> mStreams;
 
-    public SpeakerService() {
+    SpeakerService(){
         super(TAG);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
         mSpeaker = new AudioGroup();
         mSpeaker.setMode(AudioGroup.MODE_MUTED);
         mStreams = new ArrayList<Thread>();
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-    }
-
-    @Override
     protected void onHandleIntent(Intent intent){
-        try(ServerSocket ss = new ServerSocket(PORT, 50, this.getLocalAddress())){
+        // Obtain the IP address from the intent.
+        InetAddress localAddress = (InetAddress) intent.getSerializableExtra(LOCAL_IP_ADDRESS);
+        if (localAddress == null) {
+            Log.e(TAG, "onHandleIntent: localAddress was null");
+            return;
+        }
 
+        try (ServerSocket ss = new ServerSocket(PORT, 50, localAddress)){
             Log.d(TAG, "Listening for Server on \n IP: " +
                     ss.getInetAddress().getHostAddress() +
                     "\n PORT:  " + PORT );
@@ -67,8 +68,8 @@ public class SpeakerService extends IntentService {
                 NetworkTask netTask = new NetworkTask(ss.getInetAddress());
                 netTask.doInBackground(incoming);
             }
-        }catch(Exception e){
-            e.printStackTrace();
+        }catch(IOException ioe){
+            Log.e(TAG, "IOException " + ioe.getMessage());
         }
     }
 
@@ -79,45 +80,6 @@ public class SpeakerService extends IntentService {
             t.interrupt();
         }
         super.onDestroy();
-    }
-
-    private InetAddress getLocalAddress()  {
-        Log.d(TAG, "Getting Local Address");
-        WifiManager wifiManager = (WifiManager) this
-                .getSystemService(Context.WIFI_SERVICE);
-        for(Method method : wifiManager.getClass().getMethods()){
-            if(method.getName().equalsIgnoreCase("IsWifiAPEnabled")){
-                try {
-                    InetAddress ipAddress = null;
-                    if ((boolean) method.invoke(wifiManager)) {
-                        // Hardcoded Value in Android "192.168.43.1."
-                        try {
-                            ipAddress = InetAddress.getByName("192.168.43.1");
-                        } catch (UnknownHostException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // We need to obtain the address to broadcast on this interface.
-                        int ipAddressInt = wifiManager.getConnectionInfo().getIpAddress();
-                        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
-                            ipAddressInt = Integer.reverseBytes(ipAddressInt);
-                        }
-
-                        byte[] ipByteArray = BigInteger.valueOf(ipAddressInt).toByteArray();
-                        try {
-                            ipAddress = InetAddress.getByAddress(ipByteArray);
-                        } catch (UnknownHostException e) {
-                            Log.e(TAG, "Unable to get host address");
-                            ipAddress = null;
-                        }
-                    }
-                    return ipAddress;
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
     }
 
     private class NetworkTask extends AsyncTask<Socket,Void,Void>{
@@ -182,9 +144,12 @@ public class SpeakerService extends IntentService {
 
         MicStream(InetAddress speakerAddress, Socket clientSoc){
             this.mSpeakerAddress = speakerAddress;
+            Log.v(TAG, "Constructing and Connecting MicStream");
             establishConnection(clientSoc);
+            Log.d(TAG, "Established Connection");
             mBufferSize = AudioTrack.getMinBufferSize
                     (SAMPLING_RATE,CHANNEL_CONFIG,AUDIO_FORMAT)*2;
+            Log.v(TAG, "BufferSize = " + mBufferSize);
         }
 
         @Override
@@ -202,8 +167,9 @@ public class SpeakerService extends IntentService {
                     Log.d(TAG, "Wrote " +numByteWrote +" to Track");
                     speakerTrack.play();
 
-                }catch(Exception e){
-                    e.printStackTrace();
+                }catch(IOException ioe){
+                    Log.e(TAG, "IOException at main Thread for " + mAudioStream.getInetAddress());
+                    break;
                 }
             }
         }
@@ -223,10 +189,9 @@ public class SpeakerService extends IntentService {
                 Log.v(TAG, "Wrote to client :" + speakerPort);
 
                 clientSoc.close();
-            }catch(Exception e){
-                e.printStackTrace();
+            }catch(IOException ioe){
+                Log.e(TAG, "Socket Exception in establishConnection :" + ioe.getMessage());
             }
-
         }
     }
 }

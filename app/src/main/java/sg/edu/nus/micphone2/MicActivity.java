@@ -1,22 +1,17 @@
 package sg.edu.nus.micphone2;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
-import android.net.wifi.WifiManager;
-import android.support.v4.app.FragmentActivity;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,15 +24,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 
 public class MicActivity extends ActionBarActivity {
@@ -67,8 +58,10 @@ public class MicActivity extends ActionBarActivity {
 
         try {
             InetAddress speakerAddress = InetAddress.getByName(InetIP);
-            clientConnection(speakerAddress);
+            MicrophoneTask microphoneTask = new MicrophoneTask();
+            microphoneTask.execute(speakerAddress);
 
+            /*
             Socket socket = new Socket(speakerAddress, PORT);
             InputStream inputStream = socket.getInputStream();
             BufferedReader inputReader = new BufferedReader(
@@ -102,6 +95,7 @@ public class MicActivity extends ActionBarActivity {
                 datagramPacket= new DatagramPacket(bytes, bytes.length);
                 datagramSocket.send(datagramPacket);
             }
+            */
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,50 +107,6 @@ public class MicActivity extends ActionBarActivity {
 
     }
 
-
-    /***
-     *
-     * Magic From Yong Jie
-     */
-    private InetAddress getLocalAddress()  {
-        Log.d(TAG, "Getting Local Address");
-        WifiManager wifiManager = (WifiManager) this
-                .getSystemService(Context.WIFI_SERVICE);
-        for(Method method : wifiManager.getClass().getMethods()){
-            if(method.getName().equalsIgnoreCase("IsWifiAPEnabled")){
-                try {
-                    InetAddress ipAddress = null;
-                    if ((boolean) method.invoke(wifiManager)) {
-                        // Hardcoded Value in Android "192.168.43.1."
-                        try {
-                            ipAddress = InetAddress.getByName("192.168.43.1");
-                        } catch (UnknownHostException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // We need to obtain the address to broadcast on this interface.
-                        int ipAddressInt = wifiManager.getConnectionInfo().getIpAddress();
-                        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
-                            ipAddressInt = Integer.reverseBytes(ipAddressInt);
-                        }
-
-                        byte[] ipByteArray = BigInteger.valueOf(ipAddressInt).toByteArray();
-                        try {
-                            ipAddress = InetAddress.getByAddress(ipByteArray);
-                        } catch (UnknownHostException e) {
-                            Log.e(TAG, "Unable to get host address");
-                            ipAddress = null;
-                        }
-                    }
-                    return ipAddress;
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
-    }
-
     /***
      *
      * Magic From Yong Jie
@@ -164,7 +114,7 @@ public class MicActivity extends ActionBarActivity {
     private void clientConnection(InetAddress speakerAddress) {
         Log.d(TAG, "beginAudioStream to " + speakerAddress + ":" + PORT);
         try {
-            AudioStream micStream = new AudioStream(this.getLocalAddress());
+            AudioStream micStream = new AudioStream(NetworkUtils.getLocalAddress(this));
             int localPort = micStream.getLocalPort();
 
             try {
@@ -280,5 +230,17 @@ public class MicActivity extends ActionBarActivity {
     {
         Intent intent = new Intent(this, AboutActivity.class);
         startActivity(intent);
+    }
+
+    private class MicrophoneTask extends AsyncTask<InetAddress, Void, Void> {
+        @Override
+        protected Void doInBackground(InetAddress... params) {
+            if (BuildConfig.DEBUG && params.length != 1) {
+                throw new AssertionError("MicrophoneTask only accepts 1 parameter!");
+            }
+
+            clientConnection(params[0]);
+            return null;
+        }
     }
 }

@@ -1,37 +1,51 @@
 package sg.edu.nus.micphone2;
 
-import android.content.Context;
-import android.net.rtp.AudioGroup;
-import android.net.rtp.AudioStream;
-import android.net.wifi.WifiManager;
-import android.support.v7.app.ActionBarActivity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.nio.ByteOrder;
+import java.util.regex.Matcher;
 
 
 public class ManualPairingActivity extends ActionBarActivity {
     private final static String TAG = "ManualPairingActivity";
-    private final static int PORT = 65530;
+
+    private EditText mIpAddressField;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manual_pairing);
+
+        // Obtain the form details.
+        mIpAddressField = (EditText) findViewById(R.id.manual_pairing_ip_address);
+        Button pairButton = (Button) findViewById(R.id.manual_pairing_pair_btn);
+        pairButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String data = mIpAddressField.getText().toString();
+
+                // Check if data scanned is a valid IP address.
+                Matcher matcher = Patterns.IP_ADDRESS.matcher(data);
+                if (matcher.matches()) {
+                    Intent intent = new Intent(ManualPairingActivity.this, MicActivity.class);
+                    intent.putExtra(MicActivity.I_NEED_IP, data);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(
+                            ManualPairingActivity.this,
+                            getString(R.string.manual_pairing_not_an_ip_address),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
 
