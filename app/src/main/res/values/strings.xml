@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Global Strings -->
     <string name="app_name">MicPhone</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -8,5 +9,16 @@
     <string name="title_activity_about">AboutActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="speaker">Join a speaker</string>
+
+    <string name="title_activity_pairing">Pair with a Speaker</string>
+
+    <!-- Strings for Pairing Activity -->
+    <string name="pairing_choice_nfc">Pair using NFC</string>
+    <string name="pairing_choice_qr_code">Pair using QR Code</string>
+    <string name="pairing_choice_manual">Pair Manually</string>
+    <string name="title_activity_nfc_pairing">Pair using NFC</string>
+    <string name="title_activity_qr_code_pairing">Pair using QR Code</string>
+    <string name="title_activity_manual_pairing">Pair Manually</string>
+
 
 </resources>
