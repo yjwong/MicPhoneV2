@@ -95,10 +95,7 @@ public class MicActivity extends ActionBarActivity {
                 // Horrible Magic
                 // Things should be going wrong here
                 byte[] bytes = new byte[size];
-                audioBuffer = audioBuffer.wrap(bytes);
-                bytes = new byte[audioBuffer.remaining()];
-                audioBuffer.get(bytes, 0, bytes.length);
-                audioBuffer.clear();
+                //audioBuffer = audioBuffer.wrap(bytes);
                 bytes = new byte[audioBuffer.capacity()];
                 audioBuffer.get(bytes, 0, bytes.length);
 
