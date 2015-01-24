@@ -10,7 +10,7 @@
         android:id="@+id/this_is_id_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="AUDIOTONE"
+        android:text="MicPhoneV2"
 
         android:textColor="#fffbf8ff"
         android:textSize="30sp"
