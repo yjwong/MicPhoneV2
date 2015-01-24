@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 /**
@@ -16,18 +17,19 @@ public class VerifyDisconnectFragment extends DialogFragment{
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Sure or not?")
                .setMessage(R.string.mic_verify_disconnect)
-               .setPositiveButton(R.string.mic_verify_yes, new DialogInterface.OnClickListener()
-                {
-                    public void onClick(DialogInterface dialog, int id)
-                    {
+               .setPositiveButton(R.string.mic_verify_yes, new DialogInterface.OnClickListener() {
+                   public void onClick(DialogInterface dialog, int id) {
                     // Confirm Disconnect
-                    }
-                })
+                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                    startActivity(intent);
+                   }
+               })
                 .setNegativeButton(R.string.mic_verify_no, new DialogInterface.OnClickListener()
                 {
                     public void onClick(DialogInterface dialog, int id)
                     {
-                        // Cancel Disconnect
+                    // Cancel Disconnect
+                    dismiss();
                     }
                 });
 
