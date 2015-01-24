@@ -13,7 +13,7 @@
     // STUB
     // TO REMOVE BEFORE FINAL RELEASE
     <item
-        android:id="@+id/action_Mic"
+        android:id="@+id/action_mic"
         android:title="Mic"
         app:showAsAction="never"
         />
