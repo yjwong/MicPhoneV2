@@ -7,6 +7,9 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.net.wifi.WifiManager;
@@ -28,9 +31,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 
@@ -39,6 +45,13 @@ public class MicActivity extends ActionBarActivity {
     private static final String TAG = "MicActivity";
     private static final int PORT = 65530;
     public static final String I_NEED_IP = "I_NEED_IP";
+    public static final int audioSource = MediaRecorder.AudioSource.MIC;
+    public static final int sampleRateInHz = 44100;
+    public static final int channelConfig =  AudioFormat.CHANNEL_IN_STEREO;
+    public static final int audioFormat = AudioFormat.ENCODING_PCM_8BIT;
+    //public static final int bufferSize = ;
+
+
     FragmentManager fragmentManager = getFragmentManager();
 
     @Override
@@ -55,10 +68,51 @@ public class MicActivity extends ActionBarActivity {
         try {
             InetAddress speakerAddress = InetAddress.getByName(InetIP);
             clientConnection(speakerAddress);
-        } catch (UnknownHostException e) {
+
+            Socket socket = new Socket(speakerAddress, PORT);
+            InputStream inputStream = socket.getInputStream();
+            BufferedReader inputReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
+            String input = inputReader.readLine();
+            Log.v(TAG, "Read " + input + " from Speaker." );
+            int speakerPort = Integer.parseInt(input);
+            socket.close();
+
+            DatagramSocket datagramSocket = new DatagramSocket();
+            datagramSocket.connect(speakerAddress, PORT);
+
+            while(true)
+            {
+                DatagramPacket datagramPacket = null;
+
+                int bufferSize = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
+                ByteBuffer audioBuffer = ByteBuffer.allocate(bufferSize);
+
+                AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRateInHz, channelConfig, audioFormat, bufferSize);
+                int size = audioRecord.read(audioBuffer, bufferSize);
+
+                // Highly Dubious
+                // Horrible Magic
+                // Things should be going wrong here
+                byte[] bytes = new byte[size];
+                audioBuffer = audioBuffer.wrap(bytes);
+                bytes = new byte[audioBuffer.remaining()];
+                audioBuffer.get(bytes, 0, bytes.length);
+                audioBuffer.clear();
+                bytes = new byte[audioBuffer.capacity()];
+                audioBuffer.get(bytes, 0, bytes.length);
+
+                datagramPacket= new DatagramPacket(bytes, bytes.length);
+                datagramSocket.send(datagramPacket);
+            }
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
+
+
+        // Sample rate 44100Hz
 
     }
 
