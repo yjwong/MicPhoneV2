@@ -33,12 +33,6 @@ public class SpeakerService extends IntentService {
     }
 
     @Override
-    public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
     public void onCreate() {
         super.onCreate();
     }
@@ -63,6 +57,7 @@ public class SpeakerService extends IntentService {
 
     @Override
     public void onDestroy() {
+        mRunning = false;
         super.onDestroy();
     }
 
@@ -73,8 +68,6 @@ public class SpeakerService extends IntentService {
         NetworkTask(InetAddress speakerAddress){
             this.mSpeakerAddress = speakerAddress;
         }
-
-
 
         @Override
         protected Void doInBackground(Socket... clientSoc) {
@@ -114,6 +107,7 @@ public class SpeakerService extends IntentService {
             } catch (IOException ioe) {
                 Log.e(TAG, "Error in socket" + ioe.getLocalizedMessage());
             }
+            return null;
         }
     }
 }
