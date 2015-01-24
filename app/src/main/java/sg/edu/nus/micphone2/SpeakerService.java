@@ -1,6 +1,7 @@
 package sg.edu.nus.micphone2;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -67,7 +68,7 @@ public class SpeakerService extends IntentService {
                 //Thread micStream = new MicStream(ss.getInetAddress(), incoming);
                 //micStream.start();
                 //mStreams.add(micStream);
-                NetworkTask netTask = new NetworkTask(ss.getInetAddress());
+                NetworkTask netTask = new NetworkTask(ss.getInetAddress(), this);
                 netTask.doInBackground(incoming);
             }
         }catch(IOException ioe){
@@ -87,9 +88,11 @@ public class SpeakerService extends IntentService {
     private class NetworkTask extends AsyncTask<Socket,Void,Void>{
         private final static String TAG = "NetworkTask";
         private InetAddress mSpeakerAddress;
+        private Context mContext;
 
-        NetworkTask(InetAddress speakerAddress){
+        NetworkTask(InetAddress speakerAddress,Context context ){
             this.mSpeakerAddress = speakerAddress;
+            this.mContext = context;
         }
 
         @Override
@@ -121,6 +124,12 @@ public class SpeakerService extends IntentService {
                 audioStream.setCodec(CODEC);
                 audioStream.associate(micAddress, micPort);
                 audioStream.join(mSpeaker);
+
+                // Fixing AudioManagement
+                AudioManager manager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+                manager.setMicrophoneMute(true);
+                if(!manager.isWiredHeadsetOn()) manager.setSpeakerphoneOn(true);
+                manager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
                 // Print debug information about group.
                 Log.d(TAG, "Speaker address: " + audioStream.getLocalAddress() + ":"
