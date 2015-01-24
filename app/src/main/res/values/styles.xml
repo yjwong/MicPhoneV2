@@ -6,4 +6,11 @@
         <item name="colorPrimaryDark">@color/material_deep_purple_700</item>
     </style>
 
+    <style name="AppQrPairingActivityTheme" parent="AppTheme">
+        <item name="android:windowActionBarOverlay">true</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
 </resources>

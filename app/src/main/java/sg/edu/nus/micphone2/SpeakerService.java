@@ -3,6 +3,9 @@ package sg.edu.nus.micphone2;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.net.wifi.WifiManager;
@@ -18,11 +21,14 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 
 public class SpeakerService extends IntentService {
 
@@ -30,11 +36,13 @@ public class SpeakerService extends IntentService {
     private final static String TAG = "SpeakerService";
     private boolean mRunning = true;
     private AudioGroup mSpeaker;
+    private ArrayList<Thread> mStreams;
 
     public SpeakerService() {
         super(TAG);
         mSpeaker = new AudioGroup();
         mSpeaker.setMode(AudioGroup.MODE_MUTED);
+        mStreams = new ArrayList<Thread>();
     }
 
     @Override
@@ -52,6 +60,10 @@ public class SpeakerService extends IntentService {
 
             while(mRunning) {
                 Socket incoming = ss.accept();
+                //TODO Commented Code to be tested after Integration
+                //Thread micStream = new MicStream(ss.getInetAddress(), incoming);
+                //micStream.start();
+                //mStreams.add(micStream);
                 NetworkTask netTask = new NetworkTask(ss.getInetAddress());
                 netTask.doInBackground(incoming);
             }
@@ -63,6 +75,9 @@ public class SpeakerService extends IntentService {
     @Override
     public void onDestroy() {
         mRunning = false;
+        for(Thread t : mStreams){
+            t.interrupt();
+        }
         super.onDestroy();
     }
 
@@ -152,6 +167,66 @@ public class SpeakerService extends IntentService {
                 Log.e(TAG, "Error in socket" + ioe.getLocalizedMessage());
             }
             return null;
+        }
+    }
+    private class MicStream extends Thread{
+        private final static String TAG = "MicStream";
+        private final static int STREAM_TYPE = AudioManager.STREAM_MUSIC;
+        private final static int SAMPLING_RATE = 44100;
+        private final static int CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_STEREO;
+        private final static int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
+        private final static int MODE = AudioTrack.MODE_STREAM;
+        private InetAddress mSpeakerAddress;
+        private DatagramSocket mAudioStream;
+        private int mBufferSize = 1000; //8k?
+
+        MicStream(InetAddress speakerAddress, Socket clientSoc){
+            this.mSpeakerAddress = speakerAddress;
+            establishConnection(clientSoc);
+            mBufferSize = AudioTrack.getMinBufferSize
+                    (SAMPLING_RATE,CHANNEL_CONFIG,AUDIO_FORMAT)*2;
+        }
+
+        @Override
+        public void run(){
+
+            while(!this.isInterrupted()){
+                try {
+                    byte[] buffer = new byte[mBufferSize];
+                    DatagramPacket datagram = new DatagramPacket(buffer, mBufferSize);
+                    Log.d(TAG, "Waiting for Voice Data from Client" );
+                    mAudioStream.receive(datagram);
+                    AudioTrack speakerTrack = new AudioTrack(STREAM_TYPE,
+                            SAMPLING_RATE,CHANNEL_CONFIG,AUDIO_FORMAT,mBufferSize,MODE);
+                    int numByteWrote = speakerTrack.write(datagram.getData(),0, datagram.getLength());
+                    Log.d(TAG, "Wrote " +numByteWrote +" to Track");
+                    speakerTrack.play();
+
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private void establishConnection(Socket clientSoc){
+            try {
+                this.mAudioStream = new DatagramSocket();
+
+                AudioStream audioStream = new AudioStream(mSpeakerAddress);
+                int speakerPort = audioStream.getLocalPort();
+
+                OutputStream outputStream = clientSoc.getOutputStream();
+                BufferedWriter outputWriter = new BufferedWriter(
+                        new OutputStreamWriter(outputStream));
+                outputWriter.write(Integer.toString(speakerPort) + "\n");
+                outputWriter.flush();
+                Log.v(TAG, "Wrote to client :" + speakerPort);
+
+                clientSoc.close();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+
         }
     }
 }
