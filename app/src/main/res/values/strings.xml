@@ -8,6 +8,9 @@
     <string name="title_activity_mic">MicActivity</string>
     <string name="title_activity_about">AboutActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
+
+    <string name="speaker">Join a speaker</string>
+
     <string name="pair">Pair</string>
 
     <!-- Strings for SpeakerActivity -->
@@ -19,6 +22,7 @@
     <string name="mic_verify_disconnect">Are you 100% sure you want to disconnect?</string>
     <string name="mic_verify_yes">Yes</string>
     <string name="mic_verify_no">No</string>
+
     <string name="title_activity_pairing">Pair with a Speaker</string>
 
     <!-- Strings for Pairing Activity -->
@@ -40,5 +44,6 @@
     <string name="title_activity_speaker">Speaker Running</string>
     <string name="start_speaker">Start Speaker</string>
     <string name="speaker_ip_address">Speaker IP address:</string>
+
 
 </resources>
