@@ -21,5 +21,9 @@
         android:id="@+id/action_pairing"
         android:title="@string/title_activity_pairing"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_start_speaker"
+        android:title="@string/start_speaker"
+        app:showAsAction="never" />
 
 </menu>

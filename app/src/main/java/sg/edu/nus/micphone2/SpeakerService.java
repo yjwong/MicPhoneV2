@@ -32,6 +32,7 @@ import java.util.ArrayList;
 
 public class SpeakerService extends IntentService {
 
+    public final static String LOCAL_IP_ADDRESS = "LOCAL_IP_ADDRESS";
     private final static int PORT = 65530;
     private final static String TAG = "SpeakerService";
     private boolean mRunning = true;
@@ -52,8 +53,14 @@ public class SpeakerService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent){
-        try(ServerSocket ss = new ServerSocket(PORT, 50, this.getLocalAddress())){
+        // Obtain the IP address from the intent.
+        InetAddress localAddress = (InetAddress) intent.getSerializableExtra(LOCAL_IP_ADDRESS);
+        if (localAddress == null) {
+            Log.e(TAG, "onHandleIntent: localAddress was null");
+            return;
+        }
 
+        try (ServerSocket ss = new ServerSocket(PORT, 50, localAddress)){
             Log.d(TAG, "Listening for Server on \n IP: " +
                     ss.getInetAddress().getHostAddress() +
                     "\n PORT:  " + PORT );
@@ -79,45 +86,6 @@ public class SpeakerService extends IntentService {
             t.interrupt();
         }
         super.onDestroy();
-    }
-
-    private InetAddress getLocalAddress()  {
-        Log.d(TAG, "Getting Local Address");
-        WifiManager wifiManager = (WifiManager) this
-                .getSystemService(Context.WIFI_SERVICE);
-        for(Method method : wifiManager.getClass().getMethods()){
-            if(method.getName().equalsIgnoreCase("IsWifiAPEnabled")){
-                try {
-                    InetAddress ipAddress = null;
-                    if ((boolean) method.invoke(wifiManager)) {
-                        // Hardcoded Value in Android "192.168.43.1."
-                        try {
-                            ipAddress = InetAddress.getByName("192.168.43.1");
-                        } catch (UnknownHostException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        // We need to obtain the address to broadcast on this interface.
-                        int ipAddressInt = wifiManager.getConnectionInfo().getIpAddress();
-                        if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
-                            ipAddressInt = Integer.reverseBytes(ipAddressInt);
-                        }
-
-                        byte[] ipByteArray = BigInteger.valueOf(ipAddressInt).toByteArray();
-                        try {
-                            ipAddress = InetAddress.getByAddress(ipByteArray);
-                        } catch (UnknownHostException e) {
-                            Log.e(TAG, "Unable to get host address");
-                            ipAddress = null;
-                        }
-                    }
-                    return ipAddress;
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-        }
-        return null;
     }
 
     private class NetworkTask extends AsyncTask<Socket,Void,Void>{

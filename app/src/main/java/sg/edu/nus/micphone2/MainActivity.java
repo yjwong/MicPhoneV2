@@ -32,6 +32,7 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
 
         // Magic, Do not touch
+        Intent intent;
         switch(item.getItemId())
         {
 
@@ -50,7 +51,12 @@ public class MainActivity extends ActionBarActivity {
                 return true;
 
             case R.id.action_pairing:
-                Intent intent = new Intent(this, PairingActivity.class);
+                intent = new Intent(this, PairingActivity.class);
+                startActivity(intent);
+                return true;
+
+            case R.id.action_start_speaker:
+                intent = new Intent(this, SpeakerActivity.class);
                 startActivity(intent);
                 return true;
 
