@@ -21,7 +21,8 @@
         android:layout_height="wrap_content"
         android:id="@+id/manual_pairing_ip_address"
         android:layout_below="@+id/manual_pairing_enter_ip_address"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:inputType="phone"/>
 
     <Button
         android:layout_width="wrap_content"
