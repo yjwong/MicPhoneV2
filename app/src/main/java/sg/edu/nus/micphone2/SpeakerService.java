@@ -39,16 +39,16 @@ public class SpeakerService extends IntentService {
     private AudioGroup mSpeaker;
     private ArrayList<Thread> mStreams;
 
-    public SpeakerService() {
+    SpeakerService(){
         super(TAG);
-        mSpeaker = new AudioGroup();
-        mSpeaker.setMode(AudioGroup.MODE_MUTED);
-        mStreams = new ArrayList<Thread>();
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mSpeaker = new AudioGroup();
+        mSpeaker.setMode(AudioGroup.MODE_MUTED);
+        mStreams = new ArrayList<Thread>();
     }
 
     @Override
