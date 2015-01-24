@@ -2,12 +2,13 @@
     android:shape="line">
 
     <size
-        android:height="10dp"
+        android:height="100dp"
         android:width="700dp" />
 
     <stroke
         android:color="#da7bff"
-        android:width="1dp"
-        android:dashWidth="10px"
-        android:dashGap="10px" />
+        android:width="5dp"
+        android:height="10dp"
+        android:dashWidth="50px"
+        android:dashGap="50px" />
 </shape>
