@@ -33,7 +33,7 @@ public class SpeakerService extends IntentService {
     private AudioGroup mSpeaker;
     private ArrayList<Thread> mStreams;
 
-    SpeakerService(){
+    public SpeakerService() {
         super(TAG);
     }
 
