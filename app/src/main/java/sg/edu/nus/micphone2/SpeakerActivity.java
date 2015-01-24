@@ -54,7 +54,7 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
     @Override
     protected void onResume() {
         super.onResume();
-        
+
         // Start the speaker service.
         if (!mLoading && !mLoaded) {
             GetLocalAddressTask localAddressTask = new GetLocalAddressTask();

@@ -21,7 +21,6 @@
     <string name="mic_verify_disconnect">Are you 100% sure you want to disconnect?</string>
     <string name="mic_verify_yes">Yes</string>
     <string name="mic_verify_no">No</string>
-
     <string name="title_activity_pairing">Pair with a Speaker</string>
 
     <!-- Strings for Pairing Activity -->
@@ -47,6 +46,5 @@
     <string name="speaker_network_unavailable">Network Unavailable</string>
     <string name="speaker_connect_to_wifi">Connect to a WiFi network to use this application.</string>
     <string name="speaker_settings">Settings…</string>
-
 
 </resources>
