@@ -8,7 +8,6 @@ import android.media.MediaRecorder;
 import android.net.rtp.AudioGroup;
 import android.net.rtp.AudioStream;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
@@ -20,6 +19,7 @@ import android.widget.Button;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -36,17 +36,16 @@ public class MicActivity extends ActionBarActivity {
     private static final String TAG = "MicActivity";
     private static final int PORT = 65530;
     public static final String I_NEED_IP = "I_NEED_IP";
-    public static final int audioSource = MediaRecorder.AudioSource.MIC;
-    public static final int sampleRateInHz = 44100;
-    public static final int channelConfig =  AudioFormat.CHANNEL_IN_STEREO;
-    public static final int audioFormat = AudioFormat.ENCODING_PCM_8BIT;
-    //public static final int bufferSize = ;
-
+    public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
+    public static final int SAMPLING_RATE = 44100;
+    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
+    public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
 
     FragmentManager fragmentManager = getFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.v(TAG, "Creating Mic Activity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mic);
 
@@ -61,47 +60,9 @@ public class MicActivity extends ActionBarActivity {
             MicrophoneTask microphoneTask = new MicrophoneTask();
             microphoneTask.execute(speakerAddress);
 
-            /*
-            Socket socket = new Socket(speakerAddress, PORT);
-            InputStream inputStream = socket.getInputStream();
-            BufferedReader inputReader = new BufferedReader(
-                    new InputStreamReader(inputStream));
-            String input = inputReader.readLine();
-            Log.v(TAG, "Read " + input + " from Speaker." );
-            int speakerPort = Integer.parseInt(input);
-            socket.close();
-
-            DatagramSocket datagramSocket = new DatagramSocket();
-            datagramSocket.connect(speakerAddress, PORT);
-
-            while(true)
-            {
-                DatagramPacket datagramPacket = null;
-
-                int bufferSize = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
-                ByteBuffer audioBuffer = ByteBuffer.allocate(bufferSize);
-
-                AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRateInHz, channelConfig, audioFormat, bufferSize);
-                int size = audioRecord.read(audioBuffer, bufferSize);
-
-                // Highly Dubious
-                // Horrible Magic
-                // Things should be going wrong here
-                byte[] bytes = new byte[size];
-                //audioBuffer = audioBuffer.wrap(bytes);
-                bytes = new byte[audioBuffer.capacity()];
-                audioBuffer.get(bytes, 0, bytes.length);
-
-                datagramPacket= new DatagramPacket(bytes, bytes.length);
-                datagramSocket.send(datagramPacket);
-            }
-            */
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            Log.e(TAG, "Error in creating speakerAddress : " + ioe.getMessage());
         }
-
-
 
         // Sample rate 44100Hz
 
@@ -150,27 +111,13 @@ public class MicActivity extends ActionBarActivity {
                 Log.d(TAG, "Remote address: " + micStream.getRemoteAddress() + ":"
                         + micStream.getRemotePort());
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException ioe) {
+                Log.e(TAG, "IOException at clientConnection " + ioe.getMessage());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException ioe) {
+            Log.e(TAG, "IOException at AudioStream Creation");
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Magic!!!!! DO NOT TOUCH!!!!!!
     public void verifyDisconnect(View view)
@@ -242,5 +189,56 @@ public class MicActivity extends ActionBarActivity {
             clientConnection(params[0]);
             return null;
         }
+    }
+
+    private class MicrophoneStream extends AsyncTask<InetAddress, Void, Void> {
+        private final static String TAG = "MicrophoneStream";
+
+        @Override
+        protected Void doInBackground(InetAddress... params) {
+            if (BuildConfig.DEBUG && params.length != 1) {
+                throw new AssertionError("MicrophoneTask only accepts 1 parameter!");
+            }
+            try {
+                // Getting UDP Port from Speaker Via Control Channel
+                Socket socket = new Socket(params[0], PORT);
+                InputStream inputStream = socket.getInputStream();
+                BufferedReader inputReader = new BufferedReader(
+                        new InputStreamReader(inputStream));
+                String input = inputReader.readLine();
+                Log.v(TAG, "Read " + input + " from Speaker.");
+                int speakerPort = Integer.parseInt(input);
+                socket.close();
+
+                DatagramSocket datagramSocket = new DatagramSocket();
+                datagramSocket.connect(params[0], speakerPort);
+                Log.v(TAG, "Established UDP Connection to " + params[0] + " : " + speakerPort);
+
+                while (true) {
+                    DatagramPacket datagramPacket = null;
+
+                    int bufferSize = AudioRecord.getMinBufferSize(SAMPLING_RATE, CHANNEL_CONFIG, AUDIO_FORMAT);
+                    Log.d(TAG, "BufferSize : " + bufferSize);
+                    ByteBuffer audioBuffer = ByteBuffer.allocate(bufferSize);
+
+                    AudioRecord audioRecord = new AudioRecord(AUDIO_SOURCE,
+                            SAMPLING_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);
+
+                    //TODO WHAT IS THIS FOR??
+                    int size = audioRecord.read(audioBuffer, bufferSize);
+
+                    // Conversion to byte array to be sent
+                    byte[] bytes = new byte[audioBuffer.capacity()];
+                    audioBuffer.get(bytes, 0, bytes.length);
+                    Log.d(TAG, "Sending UDP Packet with payload : " + bytes.length + " bytes");
+                    datagramPacket = new DatagramPacket(bytes, bytes.length);
+                    datagramSocket.send(datagramPacket);
+                }
+            } catch (IOException ioe) {
+                Log.e(TAG, "Error in sockets " + ioe.getMessage());
+            }
+            return null;
+        }
+
     }
 }
