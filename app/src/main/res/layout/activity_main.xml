@@ -34,6 +34,7 @@
                     android:shadowColor="#A8A8A8"
                     android:shadowRadius="5"
                     android:layout_weight="0.35"
+                    android:onClick="beSpeaker"
                     />
 
                 <ImageView
@@ -57,7 +58,7 @@
                 android:shadowColor="#A8A8A8"
                 android:shadowRadius="5"
                 android:layout_centerHorizontal="true"
-
+                android:onClick="joinSpeaker"
                 android:layout_weight="0.35">
                 </Button>
         </LinearLayout>

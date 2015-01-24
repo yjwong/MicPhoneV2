@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -13,6 +14,18 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+    }
+
+    public void beSpeaker(View view)
+    {
+        Intent intent = new Intent(this, SpeakerActivity.class);
+        startActivity(intent);
+    }
+
+    public void joinSpeaker(View view)
+    {
+        Intent intent = new Intent(this, PairingActivity.class);
+        startActivity(intent);
     }
 
 
