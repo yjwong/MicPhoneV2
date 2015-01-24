@@ -64,12 +64,11 @@ public class SpeakerService extends IntentService {
 
             while(mRunning) {
                 Socket incoming = ss.accept();
-                //TODO Commented Code to be tested after Integration
-                //Thread micStream = new MicStream(ss.getInetAddress(), incoming);
-                //micStream.start();
-                //mStreams.add(micStream);
-                NetworkTask netTask = new NetworkTask(ss.getInetAddress(), this);
-                netTask.doInBackground(incoming);
+                Thread micStream = new MicStream(ss.getInetAddress(), incoming);
+                micStream.start();
+                mStreams.add(micStream);
+                //NetworkTask netTask = new NetworkTask(ss.getInetAddress(), this);
+                //netTask.doInBackground(incoming);
             }
         }catch(IOException ioe){
             Log.e(TAG, "IOException " + ioe.getMessage());

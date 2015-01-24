@@ -59,9 +59,10 @@ public class MicActivity extends ActionBarActivity {
 
         try {
             InetAddress speakerAddress = InetAddress.getByName(InetIP);
-            MicrophoneTask microphoneTask = new MicrophoneTask();
-            microphoneTask.execute(speakerAddress);
-
+            //MicrophoneTask microphoneTask = new MicrophoneTask();
+            //microphoneTask.execute(speakerAddress);
+            MicrophoneStream micStream = new MicrophoneStream();
+            micStream.execute(speakerAddress);
         } catch (IOException ioe) {
             Log.e(TAG, "Error in creating speakerAddress : " + ioe.getMessage());
         }
@@ -227,8 +228,7 @@ public class MicActivity extends ActionBarActivity {
                     AudioRecord audioRecord = new AudioRecord(AUDIO_SOURCE,
                             SAMPLING_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);
 
-                    //TODO WHAT IS THIS FOR??
-                    int size = audioRecord.read(audioBuffer, bufferSize);
+                    //int size = audioRecord.read(audioBuffer, bufferSize);
 
                     // Conversion to byte array to be sent
                     byte[] bytes = new byte[audioBuffer.capacity()];
