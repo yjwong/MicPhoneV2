@@ -1,6 +1,9 @@
 package sg.edu.nus.micphone2;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
@@ -8,6 +11,7 @@ import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -23,13 +27,15 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
     private final static String STATE_KEY_LOADING = "loading";
     private final static String STATE_KEY_LOADED = "loaded";
     private final static String STATE_KEY_LOCAL_ADDRESS = "localAddress";
-    private final static String NFC_TYPE_IP_ADDRESS = "nfcTypeIpAddress";
+    private final static String STATE_KEY_LOCAL_ADDRESS_AVAILABLE = "localAddressAvailable";
 
     private ProgressDialog mLoadingDialog;
     private boolean mLoading;
     private boolean mLoaded;
+    private boolean mLocalAddressAvailable;
     private InetAddress mLocalAddress;
     private NfcAdapter mNfcAdapter;
+    private AlertDialog mLocalAddressUnavailableDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,8 +47,14 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
             mLoading = savedInstanceState.getBoolean(STATE_KEY_LOADING);
             mLoaded = savedInstanceState.getBoolean(STATE_KEY_LOADED);
             mLocalAddress = (InetAddress) savedInstanceState.getSerializable(STATE_KEY_LOCAL_ADDRESS);
+            mLocalAddressAvailable = savedInstanceState.getBoolean(STATE_KEY_LOCAL_ADDRESS_AVAILABLE);
         }
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        
         // Start the speaker service.
         if (!mLoading && !mLoaded) {
             GetLocalAddressTask localAddressTask = new GetLocalAddressTask();
@@ -57,7 +69,11 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
 
         // If we already have the address, just populate everything.
         if (mLoaded) {
-            onLocalAddressAvailable();
+            if (mLocalAddressAvailable) {
+                onLocalAddressAvailable();
+            } else {
+                onLocalAddressUnavailable();
+            }
         }
     }
 
@@ -67,6 +83,7 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
         outState.putBoolean(STATE_KEY_LOADING, mLoading);
         outState.putBoolean(STATE_KEY_LOADED, mLoaded);
         outState.putSerializable(STATE_KEY_LOCAL_ADDRESS, mLocalAddress);
+        outState.putBoolean(STATE_KEY_LOCAL_ADDRESS_AVAILABLE, mLocalAddressAvailable);
     }
 
     @Override
@@ -75,6 +92,10 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
 
         if (mLoadingDialog != null) {
             mLoadingDialog.dismiss();
+        }
+
+        if (mLocalAddressUnavailableDialog != null) {
+            mLocalAddressUnavailableDialog.dismiss();
         }
     }
 
@@ -120,6 +141,38 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
         }
     }
 
+    /**
+     * Called when the local address is unavailable.
+     * Probably happens when WiFi is not available.
+     */
+    private void onLocalAddressUnavailable() {
+        Log.d(TAG, "onLocalAddressUnavailable");
+
+        // Display a message asking the user to enable WiFi.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.speaker_network_unavailable)
+                .setMessage(R.string.speaker_connect_to_wifi)
+                .setPositiveButton(R.string.speaker_settings, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Reset the variables, in case we decide to come back.
+                        mLoading = false;
+                        mLoaded = false;
+                        mLocalAddressAvailable = false;
+                        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        finish();
+                    }
+                });
+        mLocalAddressUnavailableDialog = builder.create();
+        mLocalAddressUnavailableDialog.show();
+    }
+
     @Override
     public NdefMessage createNdefMessage(NfcEvent event) {
         Log.d(TAG, "createNdefMessage: " + event);
@@ -147,7 +200,12 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
 
             // Save the local address.
             mLocalAddress = address;
-            onLocalAddressAvailable();
+            if (mLocalAddress == null) {
+                onLocalAddressUnavailable();
+            } else {
+                mLocalAddressAvailable = true;
+                onLocalAddressAvailable();
+            }
 
             // Hide the loading dialog.
             mLoading = false;
