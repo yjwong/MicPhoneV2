@@ -1,5 +1,6 @@
 package sg.edu.nus.micphone2;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -31,9 +32,16 @@ public class AboutActivity extends ActionBarActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            openSetting();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void openSetting()
+    {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 }
