@@ -1,7 +1,6 @@
 package sg.edu.nus.micphone2;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,13 +21,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 
 import java.net.InetAddress;
-import java.util.Map;
 
 
 public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.CreateNdefMessageCallback {
@@ -37,6 +34,8 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
     private final static String STATE_KEY_LOADED = "loaded";
     private final static String STATE_KEY_LOCAL_ADDRESS = "localAddress";
     private final static String STATE_KEY_LOCAL_ADDRESS_AVAILABLE = "localAddressAvailable";
+    private final static int QR_CODE_WIDTH = 500;
+    private final static int QR_CODE_HEIGHT = 500;
 
     private ProgressDialog mLoadingDialog;
     private boolean mLoading;
@@ -193,7 +192,7 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
      */
     private Bitmap generateQrCode(String contents) {
         try {
-            BitMatrix result = new MultiFormatWriter().encode(contents, BarcodeFormat.QR_CODE, 500, 500, null);
+            BitMatrix result = new MultiFormatWriter().encode(contents, BarcodeFormat.QR_CODE, QR_CODE_WIDTH, QR_CODE_HEIGHT, null);
             int width = result.getWidth();
             int height = result.getHeight();
             int[] pixels = new int[width * height];
@@ -204,8 +203,8 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
                 }
             }
 
-            Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-            bitmap.setPixels(pixels, 0, 500, 0, 0, 500, 500);
+            Bitmap bitmap = Bitmap.createBitmap(QR_CODE_WIDTH, QR_CODE_HEIGHT, Bitmap.Config.ARGB_8888);
+            bitmap.setPixels(pixels, 0, QR_CODE_WIDTH, 0, 0, QR_CODE_WIDTH, QR_CODE_HEIGHT);
             return bitmap;
 
         } catch (WriterException e) {
