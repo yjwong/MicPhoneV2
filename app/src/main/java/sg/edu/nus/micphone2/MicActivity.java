@@ -120,7 +120,7 @@ public class MicActivity extends ActionBarActivity {
                 micStream.setCodec(CODEC);
                 micStream.setMode(AudioStream.MODE_SEND_ONLY);
                 micStream.associate(speakerAddress, speakerPort);
-                micStream.join(streamGroup);
+                micStream.join(streamGroup);    //To leave audioStream, micStream.join(null);
 
                 // Print debug information about group.
                 Log.d(TAG, "Local address: " + micStream.getLocalAddress() + ":"
@@ -257,4 +257,11 @@ public class MicActivity extends ActionBarActivity {
         }
 
     }
+
+    public void onPause()
+    {
+        //micStream.join(streamGroup);
+       finish();
+    }
+
 }
