@@ -137,7 +137,7 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
 
         // Display speaker IP address.
         TextView ipAddressView = (TextView) findViewById(R.id.speaker_ip_address);
-        ipAddressView.setText(mLocalAddress.toString());
+        ipAddressView.setText(mLocalAddress.getHostAddress());
 
         // Advertise ourselves via NFC.
         Log.d(TAG, "Advertising via NFC");

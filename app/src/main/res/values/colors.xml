@@ -2,4 +2,5 @@
 <resources>
     <color name="material_deep_purple_500">#673ab7</color>
     <color name="material_deep_purple_700">#512da8</color>
+    <color name="material_grey_500">#9e9e9e</color>
 </resources>
