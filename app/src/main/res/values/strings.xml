@@ -23,6 +23,7 @@
     <string name="mic_verify_disconnect">Are you 100% sure you want to disconnect?</string>
     <string name="mic_verify_yes">Yes</string>
     <string name="mic_verify_no">No</string>
+    <string name="mic_icon">Microphone Icon</string>
     <string name="title_activity_pairing">Pair with a Speaker</string>
 
     <!-- Strings for Pairing Activity -->
@@ -57,5 +58,6 @@
     <string name="manual_pairing_ip_address_hint">192.168.43.1</string>
     <string name="settings_nothing_to_set_here">Nothing to set here :P</string>
     <string name="speaker_disconnect">To disconnect, simply press the back button.</string>
+    <string name="mic_connect_description">Simply speak into your phone\'s microphone.</string>
 
 </resources>
