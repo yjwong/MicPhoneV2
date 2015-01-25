@@ -47,8 +47,6 @@
     <string name="speaker_network_unavailable">Network Unavailable</string>
     <string name="speaker_connect_to_wifi">Connect to a WiFi network to use this application.</string>
     <string name="speaker_settings">Settings…</string>
-
-    <!-- Strings for SettingsActivity -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="speaker_qr_code">QR code</string>
 
 </resources>
