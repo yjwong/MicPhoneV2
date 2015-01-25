@@ -14,6 +14,9 @@
     <string name="cancel">Cancel</string>
     <string name="divider">Divider</string>
 
+    <!-- Strings for Settings -->
+    <string name="settings_nothing_to_set_here">Nothing to set here :P</string>
+
     <!-- Strings for SpeakerActivity -->
     <string name="speaker_starting_speaker">Starting Speaker…</string>
 
@@ -24,12 +27,16 @@
     <string name="mic_verify_yes">Yes</string>
     <string name="mic_verify_no">No</string>
     <string name="mic_icon">Microphone Icon</string>
-    <string name="title_activity_pairing">Pair with a Speaker</string>
+    <string name="mic_connect_description">Simply speak into your phone\'s microphone.</string>
+    <string name="mic_connecting">Connecting…</string>
+    <string name="mic_connection_failed">Connection Failed</string>
+    <string name="mic_check_connection">Please check your connection and try again.</string>
 
     <!-- Strings for Pairing Activity -->
     <string name="pairing_choice_nfc">Pair using NFC</string>
     <string name="pairing_choice_qr_code">Pair using QR Code</string>
     <string name="pairing_choice_manual">Pair Manually</string>
+    <string name="title_activity_pairing">Pair with a Speaker</string>
     <string name="title_activity_nfc_pairing">Pair using NFC</string>
     <string name="title_activity_qr_code_pairing">Pair using QR Code</string>
     <string name="title_activity_manual_pairing">Pair Manually</string>
@@ -42,6 +49,7 @@
 
     <!-- Strings for manual pairing fragment -->
     <string name="manual_pairing_not_an_ip_address">The value entered is not a valid IP address.</string>
+    <string name="manual_pairing_ip_address_hint">192.168.43.1</string>
 
     <!-- Strings for Speaker activity -->
     <string name="title_activity_speaker">Speaker Running</string>
@@ -55,9 +63,6 @@
     <string name="pairing_choice_nfc_description">To pair using NFC, simply tap your phone to the back of the phone acting as the speaker.</string>
     <string name="pairing_choice_qr_code_description">To pair using QR code, simply tap the button below and point the camera viewfinder at the QR code displayed by the speaker.</string>
     <string name="pairing_choice_manual_description">To pair manually, enter the IP address displayed by the speaker below.</string>
-    <string name="manual_pairing_ip_address_hint">192.168.43.1</string>
-    <string name="settings_nothing_to_set_here">Nothing to set here :P</string>
     <string name="speaker_disconnect">To disconnect, simply press the back button.</string>
-    <string name="mic_connect_description">Simply speak into your phone\'s microphone.</string>
 
 </resources>

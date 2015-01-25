@@ -164,7 +164,7 @@ public class SpeakerActivity extends ActionBarActivity implements NfcAdapter.Cre
 
         // Display a message asking the user to enable WiFi.
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.speaker_network_unavailable)
+        builder.setTitle(R.string.speaker_network_unavailable)
                 .setMessage(R.string.speaker_connect_to_wifi)
                 .setPositiveButton(R.string.speaker_settings, new DialogInterface.OnClickListener() {
                     @Override

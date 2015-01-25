@@ -1,6 +1,9 @@
 package sg.edu.nus.micphone2;
 
+import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
@@ -31,12 +34,12 @@ import java.io.OutputStreamWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
 
 public class MicActivity extends ActionBarActivity {
-
     private static final String TAG = "MicActivity";
     private static final int PORT = 65530;
     public static final String I_NEED_IP = "I_NEED_IP";
@@ -45,6 +48,19 @@ public class MicActivity extends ActionBarActivity {
     public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_MONO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
     private static final AudioCodec CODEC = AudioCodec.GSM_EFR;
+    private static final int SOCKET_TIMEOUT = 2500;
+
+    private static final String STATE_KEY_LOADING = "loading";
+    private static final String STATE_KEY_LOADED = "loaded";
+    private static final String STATE_KEY_SPEAKER_CONNECTED = "speakerConnected";
+
+    private boolean mLoading;
+    private boolean mLoaded;
+    private boolean mSpeakerConnected;
+    private ProgressDialog mLoadingDialog;
+    private AlertDialog mConnectionFailedDialog;
+    private AudioStream mMicStream;
+    private AudioGroup mMicStreamGroup;
 
     FragmentManager fragmentManager = getFragmentManager();
 
@@ -54,30 +70,45 @@ public class MicActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mic);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // Restore state.
+        if (savedInstanceState != null) {
+            mLoading = savedInstanceState.getBoolean(STATE_KEY_LOADING);
+            mLoaded = savedInstanceState.getBoolean(STATE_KEY_LOADED);
+            mSpeakerConnected = savedInstanceState.getBoolean(STATE_KEY_SPEAKER_CONNECTED);
+        }
 
-        try {
-            // Check if the IP is available via NFC.
-            Intent intent = getIntent();
-            InetAddress speakerAddress = null;
-            if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
-                Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-                NdefMessage message = (NdefMessage) rawMessages[0];
-                speakerAddress = InetAddress.getByAddress(message.getRecords()[0].getPayload());
-            } else {
-                String inetIP = intent.getStringExtra(I_NEED_IP);
-                speakerAddress = InetAddress.getByName(inetIP);
+        // Start the microphone service.
+        if (!mLoading && !mLoaded) {
+            try {
+                // Check if the IP is available via NFC.
+                Intent intent = getIntent();
+                InetAddress speakerAddress = null;
+                if (NfcAdapter.ACTION_NDEF_DISCOVERED.equals(getIntent().getAction())) {
+                    Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+                    NdefMessage message = (NdefMessage) rawMessages[0];
+                    speakerAddress = InetAddress.getByAddress(message.getRecords()[0].getPayload());
+                } else {
+                    String inetIP = intent.getStringExtra(I_NEED_IP);
+                    speakerAddress = InetAddress.getByName(inetIP);
+                }
+
+                if (speakerAddress == null) {
+                    Log.e(TAG, "speakerAddress is null");
+                } else {
+                    MicrophoneTask microphoneTask = new MicrophoneTask();
+                    microphoneTask.execute(speakerAddress);
+                }
+
+            } catch (IOException ioe) {
+                Log.e(TAG, "Error in creating speakerAddress : " + ioe.getMessage());
             }
 
-            if (speakerAddress == null) {
-                Log.e(TAG, "speakerAddress is null");
-            } else {
-                MicrophoneTask microphoneTask = new MicrophoneTask();
-                microphoneTask.execute(speakerAddress);
-            }
+            mLoading = true;
+        }
 
-        } catch (IOException ioe) {
-            Log.e(TAG, "Error in creating speakerAddress : " + ioe.getMessage());
+        // Create a progress dialog while the service is brought up.
+        if (mLoading) {
+            mLoadingDialog = ProgressDialog.show(this, "", getString(R.string.mic_connecting), true);
         }
 
         // Set up button events.
@@ -92,62 +123,77 @@ public class MicActivity extends ActionBarActivity {
         });
     }
 
-    /***
-     *
-     * Magic From Yong Jie
-     */
-    private void clientConnection(InetAddress speakerAddress) {
-        Log.d(TAG, "beginAudioStream to " + speakerAddress + ":" + PORT);
-        try {
-            AudioStream micStream = new AudioStream(NetworkUtils.getLocalAddress(this));
-            int localPort = micStream.getLocalPort();
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_KEY_LOADING, mLoading);
+        outState.putBoolean(STATE_KEY_LOADED, mLoaded);
+        outState.putBoolean(STATE_KEY_SPEAKER_CONNECTED, mSpeakerConnected);
+    }
 
-            try {
-                // Negotiate the RTP endpoints of the server.
-                Socket socket = new Socket(speakerAddress, PORT);
-                OutputStream outputStream = socket.getOutputStream();
-                BufferedWriter outputWriter = new BufferedWriter(
-                        new OutputStreamWriter(outputStream));
-                outputWriter.write(Integer.toString(localPort) + "\n");
-                Log.v(TAG, "Wrote Port " + localPort + " to Speaker." );
-                outputWriter.flush();
+    @Override
+    public void onResume() {
+        super.onResume();
 
-                InputStream inputStream = socket.getInputStream();
-                BufferedReader inputReader = new BufferedReader(
-                        new InputStreamReader(inputStream));
-                String input = inputReader.readLine();
-                Log.v(TAG, "Read " + input + " from Speaker." );
-                int speakerPort = Integer.parseInt(input);
-                socket.close();
-
-                // Associate with server RTP endpoint.
-                AudioGroup streamGroup = new AudioGroup();
-                // streamGroup.setMode(AudioGroup.MODE_ECHO_SUPPRESSION);
-                streamGroup.setMode(AudioGroup.MODE_NORMAL);
-
-                micStream.setCodec(CODEC);
-                micStream.setMode(AudioStream.MODE_SEND_ONLY);
-                micStream.associate(speakerAddress, speakerPort);
-                micStream.join(streamGroup);    //To leave audioStream, micStream.join(null);
-
-                // Print debug information about group.
-                Log.d(TAG, "Local address: " + micStream.getLocalAddress() + ":"
-                        + micStream.getLocalPort());
-                Log.d(TAG, "Remote address: " + micStream.getRemoteAddress() + ":"
-                        + micStream.getRemotePort());
-
-            } catch (IOException ioe) {
-                Log.e(TAG, "IOException at clientConnection " + ioe.getMessage());
-            }
-        } catch (IOException ioe) {
-            Log.e(TAG, "IOException at AudioStream Creation");
+        // Join the stream when we're back.
+        if (mMicStream != null && mMicStreamGroup != null) {
+            mMicStream.join(mMicStreamGroup);
         }
     }
 
-    // Magic!!!!! DO NOT TOUCH!!!!!!
-    public void verifyDisconnect(View view)
-    {
+    @Override
+    public void onPause() {
+        super.onPause();
 
+        // Leave the stream when we're out.
+        if (mMicStream != null) {
+            mMicStream.join(null);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mLoadingDialog != null) {
+            mLoadingDialog.dismiss();
+        }
+
+        if (mConnectionFailedDialog != null) {
+            mConnectionFailedDialog.dismiss();
+        }
+
+        if (mMicStream != null) {
+            mMicStream.join(null);
+        }
+    }
+
+    private void onConnectFailed() {
+        Log.d(TAG, "onConnectFailed");
+        mLoadingDialog.dismiss();
+        mLoading = false;
+        mLoaded = true;
+
+        // Display a message to tell the user that connection failed.
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.mic_connection_failed)
+                .setMessage(R.string.mic_check_connection)
+                .setNegativeButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+        mConnectionFailedDialog = builder.create();
+        mConnectionFailedDialog.show();
+    }
+
+    private void onConnectedToSpeaker() {
+        Log.d(TAG, "onConnectedToSpeaker");
+        mLoadingDialog.dismiss();
+        mLoading = false;
+        mLoaded = true;
+        mSpeakerConnected = true;
     }
 
     @Override
@@ -196,15 +242,83 @@ public class MicActivity extends ActionBarActivity {
         startActivity(intent);
     }
 
-    private class MicrophoneTask extends AsyncTask<InetAddress, Void, Void> {
+    private class MicrophoneTask extends AsyncTask<InetAddress, Void, Boolean> {
         @Override
-        protected Void doInBackground(InetAddress... params) {
+        protected Boolean doInBackground(InetAddress... params) {
             if (BuildConfig.DEBUG && params.length != 1) {
                 throw new AssertionError("MicrophoneTask only accepts 1 parameter!");
             }
 
-            clientConnection(params[0]);
-            return null;
+            return clientConnection(params[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (result) {
+                onConnectedToSpeaker();
+            } else {
+                onConnectFailed();
+            }
+        }
+
+        /***
+         * Magic From Yong Jie
+         */
+        private boolean clientConnection(InetAddress speakerAddress) {
+            Log.d(TAG, "beginAudioStream to " + speakerAddress + ":" + PORT);
+            try {
+                mMicStream = new AudioStream(NetworkUtils.getLocalAddress(MicActivity.this));
+                int localPort = mMicStream.getLocalPort();
+
+                try {
+                    // Negotiate the RTP endpoints of the server.
+                    Socket socket = new Socket();
+                    socket.connect(new InetSocketAddress(speakerAddress, PORT), SOCKET_TIMEOUT);
+
+                    OutputStream outputStream = socket.getOutputStream();
+                    BufferedWriter outputWriter = new BufferedWriter(
+                            new OutputStreamWriter(outputStream));
+                    outputWriter.write(Integer.toString(localPort) + "\n");
+                    Log.v(TAG, "Wrote Port " + localPort + " to Speaker." );
+                    outputWriter.flush();
+
+                    InputStream inputStream = socket.getInputStream();
+                    BufferedReader inputReader = new BufferedReader(
+                            new InputStreamReader(inputStream));
+                    String input = inputReader.readLine();
+                    Log.v(TAG, "Read " + input + " from Speaker." );
+                    int speakerPort = Integer.parseInt(input);
+                    socket.close();
+
+                    // Associate with server RTP endpoint.
+                    mMicStreamGroup = new AudioGroup();
+                    // streamGroup.setMode(AudioGroup.MODE_ECHO_SUPPRESSION);
+                    mMicStreamGroup.setMode(AudioGroup.MODE_NORMAL);
+
+                    mMicStream.setCodec(CODEC);
+                    mMicStream.setMode(AudioStream.MODE_SEND_ONLY);
+                    mMicStream.associate(speakerAddress, speakerPort);
+                    mMicStream.join(mMicStreamGroup);    //To leave audioStream, micStream.join(null);
+
+                    // Print debug information about group.
+                    Log.d(TAG, "Local address: " + mMicStream.getLocalAddress() + ":"
+                            + mMicStream.getLocalPort());
+                    Log.d(TAG, "Remote address: " + mMicStream.getRemoteAddress() + ":"
+                            + mMicStream.getRemotePort());
+
+                    // Everything's set up at this point.
+                    return true;
+
+                } catch (IOException ioe) {
+                    Log.e(TAG, "IOException at clientConnection " + ioe.getMessage());
+                }
+
+            } catch (IOException ioe) {
+                Log.e(TAG, "IOException at AudioStream Creation");
+
+            }
+
+            return false;
         }
     }
 
@@ -257,13 +371,6 @@ public class MicActivity extends ActionBarActivity {
             return null;
         }
 
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        //micStream.join(streamGroup);
-       finish();
     }
 
 }

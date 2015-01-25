@@ -143,7 +143,8 @@ public class SpeakerService extends IntentService {
             return null;
         }
     }
-    private class MicStream extends Thread{
+
+    private class MicStream extends Thread {
         private final static String TAG = "MicStream";
         private final static int STREAM_TYPE = AudioManager.STREAM_MUSIC;
         private final static int SAMPLING_RATE = 44100;
@@ -166,8 +167,7 @@ public class SpeakerService extends IntentService {
 
         @Override
         public void run(){
-
-            while(!this.isInterrupted()){
+            while (!this.isInterrupted()) {
                 try {
                     byte[] buffer = new byte[mBufferSize];
                     DatagramPacket datagram = new DatagramPacket(buffer, mBufferSize);
@@ -179,7 +179,7 @@ public class SpeakerService extends IntentService {
                     Log.d(TAG, "Wrote " +numByteWrote +" to Track");
                     speakerTrack.play();
 
-                }catch(IOException ioe){
+                } catch(IOException ioe) {
                     Log.e(TAG, "IOException at main Thread for " + mAudioStream.getInetAddress());
                     break;
                 }
