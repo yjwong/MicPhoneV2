@@ -15,7 +15,7 @@
         android:text="MicPhoneV2"
 
 
-        android:textColor="#fffbf8ff"
+        android:textColor="#000000"
         android:textSize="30sp"
         android:textIsSelectable="false"
         android:visibility="visible"
