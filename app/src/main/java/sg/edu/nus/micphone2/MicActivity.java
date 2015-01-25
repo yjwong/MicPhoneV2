@@ -259,8 +259,9 @@ public class MicActivity extends ActionBarActivity {
 
     }
 
-    public void onPause()
-    {
+    @Override
+    public void onPause() {
+        super.onPause();
         //micStream.join(streamGroup);
        finish();
     }
