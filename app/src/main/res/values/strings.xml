@@ -31,6 +31,9 @@
     <string name="title_activity_nfc_pairing">Pair using NFC</string>
     <string name="title_activity_qr_code_pairing">Pair using QR Code</string>
     <string name="title_activity_manual_pairing">Pair Manually</string>
+    <string name="pairing_title_nfc">NFC</string>
+    <string name="pairing_title_qr_code">QR Code</string>
+    <string name="pairing_title_manual">Manual</string>
 
     <!-- Strings for QR code pairing activity -->
     <string name="qr_code_not_an_ip_address">A QR code was detected, but is not a MicPhone QR code.</string>
