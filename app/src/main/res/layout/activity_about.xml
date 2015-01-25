@@ -1,13 +1,15 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent"
     tools:context="sg.edu.nus.micphone2.AboutActivity"
 
     android:id="@+id/action_about">
-
+    <RelativeLayout android:background="@drawable/ground"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true" />
     <TextView
         android:id="@+id/this_is_id_name"
         android:layout_width="wrap_content"
@@ -15,7 +17,7 @@
         android:text="MicPhoneV2"
 
 
-        android:textColor="#000000"
+        android:textColor="#E1BEE7"
         android:textSize="30sp"
         android:textIsSelectable="false"
         android:visibility="visible"
@@ -31,7 +33,8 @@
         android:layout_below="@id/this_is_id_name"
         android:text="Built During NUS Hackathon 2015"
         android:layout_centerHorizontal="true"
-        />
+        android:textColor="#E1BEE7"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/teamName"
@@ -42,7 +45,8 @@
         android:layout_below="@id/eventName"
         android:text="Team Burden"
         android:layout_centerHorizontal="true"
-        />
+        android:textColor="#E1BEE7"
+        android:textStyle="bold" />
 
 
 

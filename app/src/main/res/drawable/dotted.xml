@@ -6,7 +6,7 @@
         android:width="700dp" />
 
     <stroke
-        android:color="#da7bff"
+        android:color="#BDBDBD"
         android:width="5dp"
         android:height="10dp"
         android:dashWidth="50px"
