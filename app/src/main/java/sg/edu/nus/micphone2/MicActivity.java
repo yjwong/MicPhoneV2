@@ -241,7 +241,6 @@ public class MicActivity extends ActionBarActivity {
                     AudioRecord audioRecord = new AudioRecord(AUDIO_SOURCE,
                             SAMPLING_RATE, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSize);
 
-                    //TODO WHAT IS THIS FOR??
                     int size = audioRecord.read(audioBuffer, bufferSize);
 
                     // Conversion to byte array to be sent
