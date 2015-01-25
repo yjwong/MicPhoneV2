@@ -42,7 +42,7 @@ public class MicActivity extends ActionBarActivity {
     public static final String I_NEED_IP = "I_NEED_IP";
     public static final int AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
     public static final int SAMPLING_RATE = 44100;
-    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_STEREO;
+    public static final int CHANNEL_CONFIG =  AudioFormat.CHANNEL_IN_MONO;
     public static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_8BIT;
     private static final AudioCodec CODEC = AudioCodec.GSM_EFR;
 
@@ -80,8 +80,16 @@ public class MicActivity extends ActionBarActivity {
             Log.e(TAG, "Error in creating speakerAddress : " + ioe.getMessage());
         }
 
-        // Sample rate 44100Hz
-
+        // Set up button events.
+        Button confirmDisconnect = (Button) findViewById(R.id.verifyDisconnect);
+        confirmDisconnect.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view) {
+                VerifyDisconnectFragment verifyDisconnectFragment = new VerifyDisconnectFragment();
+                verifyDisconnectFragment.show(fragmentManager, "AH HA HA HA");
+            }
+        });
     }
 
     /***
@@ -139,15 +147,7 @@ public class MicActivity extends ActionBarActivity {
     // Magic!!!!! DO NOT TOUCH!!!!!!
     public void verifyDisconnect(View view)
     {
-        Button confirmDisconnect = (Button) findViewById(R.id.verifyDisconnect);
-        confirmDisconnect.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view) {
-                VerifyDisconnectFragment verifyDisconnectFragment = new VerifyDisconnectFragment();
-                verifyDisconnectFragment.show(fragmentManager, "AH HA HA HA");
-            }
-        });
+
     }
 
     @Override
