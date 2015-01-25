@@ -3,9 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:layout_centerInParent="true"
     tools:context="sg.edu.nus.micphone2.MicActivity">
 
-    <TextView android:text="@string/mic_connected" android:layout_width="wrap_content"
+    <TextView android:text="@string/mic_connected"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <Button
