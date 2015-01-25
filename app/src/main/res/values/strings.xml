@@ -38,8 +38,7 @@
     <!-- Strings for QR code pairing activity -->
     <string name="qr_code_not_an_ip_address">A QR code was detected, but is not a MicPhone QR code.</string>
 
-    <!-- Strings for manual pairing activity -->
-    <string name="manual_pairing_enter_ip_address">To pair with a speaker, enter the speaker\'s IP address.</string>
+    <!-- Strings for manual pairing fragment -->
     <string name="manual_pairing_not_an_ip_address">The value entered is not a valid IP address.</string>
 
     <!-- Strings for Speaker activity -->
@@ -51,5 +50,9 @@
     <string name="speaker_connect_to_wifi">Connect to a WiFi network to use this application.</string>
     <string name="speaker_settings">Settings…</string>
     <string name="speaker_qr_code">QR code</string>
+    <string name="pairing_choice_nfc_description">To pair using NFC, simply tap your phone to the back of the phone acting as the speaker.</string>
+    <string name="pairing_choice_qr_code_description">To pair using QR code, simply tap the button below and point the camera viewfinder at the QR code displayed by the speaker.</string>
+    <string name="pairing_choice_manual_description">To pair manually, enter the IP address displayed by the speaker below.</string>
+    <string name="manual_pairing_ip_address_hint">192.168.43.1</string>
 
 </resources>

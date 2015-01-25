@@ -26,7 +26,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/buttonshape"
-                    android:shadowColor="#A8A8A8"
+                    android:shadowColor="@color/material_deep_purple_700"
                     android:shadowRadius="5"
                     android:layout_weight="0.35"
                     android:onClick="beSpeaker"
@@ -49,8 +49,8 @@
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/buttonshape"
-                    android:shadowColor="#A8A8A8"
-                    android:shadowRadius="5"
+                    android:shadowColor="@color/material_deep_purple_700"
+                    android:shadowRadius="0"
                     android:onClick="joinSpeaker"
                     android:layout_weight="0.35">
                 </Button>

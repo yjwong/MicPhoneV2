@@ -9,12 +9,17 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import java.util.regex.Matcher;
 
 
 public class PairingActivity extends ActionBarActivity {
@@ -126,15 +131,6 @@ public class PairingActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_pairing_nfc_info, container, false);
-            Button pairButton = (Button) rootView.findViewById(R.id.pairing_choice_nfc);
-            pairButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(mContext, NfcPairingActivity.class);
-                    startActivity(intent);
-                }
-            });
-
             return rootView;
         }
     }
@@ -166,6 +162,7 @@ public class PairingActivity extends ActionBarActivity {
 
     public static class ManualInfoFragment extends Fragment {
         private Context mContext;
+        private EditText mIpAddressField;
 
         public static ManualInfoFragment newInstance(Context context) {
             ManualInfoFragment fragment = new ManualInfoFragment();
@@ -176,12 +173,27 @@ public class PairingActivity extends ActionBarActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_pairing_manual_info, container, false);
-            Button pairButton = (Button) rootView.findViewById(R.id.pairing_choice_manual);
+
+            // Obtain the form details.
+            mIpAddressField = (EditText) rootView.findViewById(R.id.manual_pairing_ip_address);
+            Button pairButton = (Button) rootView.findViewById(R.id.manual_pairing_pair_btn);
             pairButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mContext, ManualInfoFragment.class);
-                    startActivity(intent);
+                    String data = mIpAddressField.getText().toString();
+
+                    // Check if data scanned is a valid IP address.
+                    Matcher matcher = Patterns.IP_ADDRESS.matcher(data);
+                    if (matcher.matches()) {
+                        Intent intent = new Intent(mContext, MicActivity.class);
+                        intent.putExtra(MicActivity.I_NEED_IP, data);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(
+                                mContext,
+                                getString(R.string.manual_pairing_not_an_ip_address),
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
