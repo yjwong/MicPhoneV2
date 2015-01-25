@@ -50,7 +50,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/buttonshape"
                     android:shadowColor="@color/material_deep_purple_700"
-                    android:shadowRadius="0"
+                    android:shadowRadius="5"
                     android:onClick="joinSpeaker"
                     android:layout_weight="0.35">
                 </Button>

@@ -17,14 +17,21 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/pairing_choice_manual_description"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:textSize="20dp"
+            android:maxWidth="240dp" />
 
         <EditText
-            android:layout_width="match_parent"
+            android:layout_width="164dp"
             android:layout_height="wrap_content"
             android:id="@+id/manual_pairing_ip_address"
             android:inputType="phone"
-            android:hint="@string/manual_pairing_ip_address_hint" />
+            android:hint="@string/manual_pairing_ip_address_hint"
+            android:maxWidth="50dp"
+            android:layout_gravity="center_horizontal"
+            android:textSize="20dp"
+            android:textAlignment="center"
+            android:gravity="center_vertical|center_horizontal" />
 
         <Button
             android:layout_width="wrap_content"
